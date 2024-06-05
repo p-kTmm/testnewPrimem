@@ -57,7 +57,7 @@ class SumTree:
 
 class Memory:
     e = 0.01
-    a = 0.8
+    a = 0.6
     beta = 0.4
     beta_increment_per_sampling = 0.001
     absolute_error_upper = 1.0  # Giới hạn lỗi tuyệt đối tối đa
