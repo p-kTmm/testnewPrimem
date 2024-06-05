@@ -22,7 +22,7 @@ class TrainModel:
 
 
     #----------------------
-        self.step_counter = 0
+        self.train_counter = 0
         self.update_freq = 10
         # Main model
         self._model = self._build_model(num_layers, width)
@@ -45,39 +45,54 @@ class TrainModel:
         return model
     
 
-    def predict_one(self, state):
+    def predict_one(self, state, use_target=True):
         """
-        Predict the action values from a single state
+        Predict the action values from a single state using the appropriate model
         """
         state = np.reshape(state, [1, self._input_dim])
+        if use_target:
+            return self._target_model.predict(state)
         return self._model.predict(state)
 
-
-    def predict_batch(self, states):
+    def predict_batch(self, states, use_target=True):
         """
-        Predict the action values from a batch of states
+        Predict the action values from a batch of states using the appropriate model
         """
+        if use_target:
+            return self._target_model.predict(states)
         return self._model.predict(states)
 
 
     def train_batch(self, states, q_sa, is_weights):
-        # self._model.fit(states, q_sa, epochs=1, verbose=0)
-
-        # Convert importance sampling weights to a proper format that can be used with the loss function
+        """
+        Train the main model using the updated q-values
+        """
         sample_weights = np.array(is_weights)
         self._model.fit(states, q_sa, sample_weight=sample_weights, epochs=1, verbose=0)
+        self.train_counter += 1
+        if self.train_counter % self.update_freq == 0:
+            self.update_target_model()
 
     def save_model(self, path):
         """
         Save the current model in the folder as h5 file and a model architecture summary as png
         """
+        # self._model.save(os.path.join(path, 'trained_model.h5'))
+        # plot_model(self._model, to_file=os.path.join(path, 'model_structure.png'), show_shapes=True, show_layer_names=True)
+
+    
         self._model.save(os.path.join(path, 'trained_model.h5'))
+        self._target_model.save(os.path.join(path, 'target_model.h5'))
+    
+        # Optionally save the model architectures to PNG
         plot_model(self._model, to_file=os.path.join(path, 'model_structure.png'), show_shapes=True, show_layer_names=True)
-        
+        plot_model(self._target_model, to_file=os.path.join(path, 'model_structure_target.png'), show_shapes=True, show_layer_names=True)
+
     def update_target_model(self):
-        """ Update the target model weights. """
-        if self.step_counter % self.update_freq == 0:
-            self._target_model.set_weights(self._model.get_weights())
+        """
+        Update the target model weights to match the main model
+        """
+        self._target_model.set_weights(self._model.get_weights())
 
     @property
     def input_dim(self):
