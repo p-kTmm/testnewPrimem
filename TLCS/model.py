@@ -18,8 +18,17 @@ class TrainModel:
         self._output_dim = output_dim
         self._batch_size = batch_size
         self._learning_rate = learning_rate
-        self._model = self._build_model(num_layers, width)
+        # self._model = self._build_model(num_layers, width)
 
+
+    #----------------------
+        self.step_counter = 0
+        self.update_freq = 10
+        # Main model
+        self._model = self._build_model(num_layers, width)
+        # Target model
+        self._target_model = self._build_model(num_layers, width)
+        self._target_model.set_weights(self._model.get_weights())
 
     def _build_model(self, num_layers, width):
         """
@@ -64,7 +73,11 @@ class TrainModel:
         """
         self._model.save(os.path.join(path, 'trained_model.h5'))
         plot_model(self._model, to_file=os.path.join(path, 'model_structure.png'), show_shapes=True, show_layer_names=True)
-
+        
+    def update_target_model(self):
+        """ Update the target model weights. """
+        if self.step_counter % self.update_freq == 0:
+            self._target_model.set_weights(self._model.get_weights())
 
     @property
     def input_dim(self):
