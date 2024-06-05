@@ -44,7 +44,7 @@ class Simulation:
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
         print("Simulating...")
-        print("Priority Memory: ", str(self._Memory._priority))
+
         # inits
         self._step = 0
         self._waiting_times = {}
@@ -73,7 +73,8 @@ class Simulation:
               max_future_q = np.max(self._Model.predict_one(current_state))
               td_error = reward + self._gamma * max_future_q - old_q_value
               # Add sample to the memory with the calculated TD error as priority
-              self._Memory.add_sample((old_state, old_action, reward, current_state), abs(td_error) if self._Memory._priority else 1.0)
+              self._Memory.add_sample((old_state, old_action, reward, current_state), td_error)
+
 
             # choose the light phase to activate, based on the current state of the intersection
             action = self._choose_action(current_state, epsilon)
@@ -262,7 +263,7 @@ class Simulation:
         """
         Retrieve a group of samples from the memory and for each of them update the learning equation, then train
         """
-        batch, indices = self._Memory.get_samples(self._Model.batch_size)  # Get samples and their indices
+        batch, idxs, is_weights = self._Memory.get_samples(self._Model.batch_size)  # Get samples and their indices
 
         if len(batch) > 0:  # if the memory is full enough
             states = np.array([val[0] for val in batch])  # extract states from the batch
@@ -286,11 +287,9 @@ class Simulation:
                 x[i] = state
                 y[i] = current_q  # Q(state) that includes the updated action value
 
-            self._Model.train_batch(x, y)  # train the NN
 
-            # Update priorities based on TD errors if priority is enabled
-            if self._Memory._priority:
-                self._Memory.update_priorities(indices, abs(td_errors))
+            self._Model.train_batch(x, y, is_weights)  # train the NN with importance sampling weights
+            self._Memory.update_priorities(idxs, td_errors)
 
 
     def _save_episode_stats(self):
@@ -315,4 +314,3 @@ class Simulation:
     @property
     def avg_queue_length_store(self):
         return self._avg_queue_length_store
-
