@@ -68,9 +68,9 @@ class Memory:
         self.size_max = size_max 
         
     def _get_priority(self, error):
-        clipped_error = np.minimum(np.abs(error) + self.e, self.absolute_error_upper)  # Giới hạn lỗi
-        return clipped_error ** self.a
-        # return (np.abs(error) + self.e) ** self.a
+        # clipped_error = np.minimum(np.abs(error) + self.e, self.absolute_error_upper)  # Giới hạn lỗi
+        # return clipped_error ** self.a
+        return (np.abs(error) + self.e) ** self.a
 
 
     def add_sample(self, sample, error):
