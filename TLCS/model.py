@@ -55,8 +55,7 @@ class TrainModel:
         # self._model.fit(states, q_sa, epochs=1, verbose=0)
 
         # Convert importance sampling weights to a proper format that can be used with the loss function
-        sample_weights = is_weights
-        # sample_weights = np.array(is_weights)
+        sample_weights = np.array(is_weights)
         self._model.fit(states, q_sa, sample_weight=sample_weights, epochs=1, verbose=0)
 
     def save_model(self, path):
