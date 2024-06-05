@@ -51,12 +51,12 @@ class TrainModel:
         return self._model.predict(states)
 
 
-    def train_batch(self, states, q_sa):
-        """
-        Train the nn using the updated q-values
-        """
-        self._model.fit(states, q_sa, epochs=1, verbose=0)
+    def train_batch(self, states, q_sa, is_weights):
+        # self._model.fit(states, q_sa, epochs=1, verbose=0)
 
+        # Convert importance sampling weights to a proper format that can be used with the loss function
+        sample_weights = np.array(is_weights)
+        self._model.fit(states, q_sa, sample_weight=sample_weights, epochs=1, verbose=0)
 
     def save_model(self, path):
         """
