@@ -30,8 +30,7 @@ if __name__ == "__main__":
 
     Memory = Memory(
         config['memory_size_max'], 
-        config['memory_size_min'],
-        config['priority']
+        config['memory_size_min']
     )
 
     TrafficGen = TrafficGenerator(
