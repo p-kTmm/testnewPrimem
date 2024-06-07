@@ -23,7 +23,7 @@ class TrainModel:
 
     #----------------------
         self.train_counter = 0
-        self.update_freq = 10
+        self.update_freq = 50
         # Main model
         self._model = self._build_model(num_layers, width)
         # Target model
