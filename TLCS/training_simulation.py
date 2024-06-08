@@ -266,7 +266,8 @@ class Simulation:
         """
         Retrieve a group of samples from the memory and for each of them update the learning equation, then train
         """
-        batch, idxs, is_weights = self._Memory.get_samples(self._Model.batch_size)  # Get samples and their indices
+        # batch, idxs, is_weights = self._Memory.get_samples(self._Model.batch_size)  # Get samples and their indices
+        batch = self._Memory.get_samples(self._Model.batch_size)
 
         if len(batch) > 0:  # if the memory is full enough
             states = np.array([val[0] for val in batch])  # extract states from the batch
