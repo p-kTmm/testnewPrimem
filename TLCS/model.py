@@ -63,12 +63,17 @@ class TrainModel:
         return self._model.predict(states)
 
 
-    def train_batch(self, states, q_sa, is_weights):
+    # def train_batch(self, states, q_sa, is_weights):
+    #     """
+    #     Train the main model using the updated q-values
+    #     """
+    #     sample_weights = np.array(is_weights)
+    #     self._model.fit(states, q_sa, sample_weight=sample_weights, epochs=1, verbose=0)\
+    def train_batch(self, states, q_sa):
         """
-        Train the main model using the updated q-values
+        Train the nn using the updated q-values
         """
-        sample_weights = np.array(is_weights)
-        self._model.fit(states, q_sa, sample_weight=sample_weights, epochs=1, verbose=0)
+        self._model.fit(states, q_sa, epochs=1, verbose=0)
         self.train_counter += 1
         if self.train_counter % self.update_freq == 0:
             self.update_target_model()
