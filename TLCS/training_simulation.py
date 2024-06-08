@@ -66,16 +66,19 @@ class Simulation:
             reward = old_total_wait - current_total_wait
 
             # saving the data into the memory
+            # if self._step != 0:
+            #   # Estimate the Q-value for the old state-action pair
+            #   old_q_value = self._Model.predict_one(old_state)[0][old_action]
+            #   # Calculate the target Q-value
+            #   max_future_q = np.max(self._Model.predict_one(current_state))
+            #   td_error = reward + self._gamma * max_future_q - old_q_value
+            #   # Add sample to the memory with the calculated TD error as priority
+            #   self._Memory.add_sample((old_state, old_action, reward, current_state), td_error)
+
             if self._step != 0:
-              # Estimate the Q-value for the old state-action pair
-              old_q_value = self._Model.predict_one(old_state)[0][old_action]
-              # Calculate the target Q-value
-              max_future_q = np.max(self._Model.predict_one(current_state))
-              td_error = reward + self._gamma * max_future_q - old_q_value
-              # Add sample to the memory with the calculated TD error as priority
-              self._Memory.add_sample((old_state, old_action, reward, current_state), td_error)
+                self._Memory.add_sample((old_state, old_action, reward, current_state))
 
-
+            
             # choose the light phase to activate, based on the current state of the intersection
             action = self._choose_action(current_state, epsilon)
 
@@ -287,9 +290,9 @@ class Simulation:
                 x[i] = state
                 y[i] = current_q  # Q(state) that includes the updated action value
 
-
-            self._Model.train_batch(x, y, is_weights)  # train the NN with importance sampling weights
-            self._Memory.update_priorities(idxs, td_errors)
+            self._Model.train_batch(x, y)  # train the NN
+            # self._Model.train_batch(x, y, is_weights)  # train the NN with importance sampling weights
+            # self._Memory.update_priorities(idxs, td_errors)
 
 
     def _save_episode_stats(self):
